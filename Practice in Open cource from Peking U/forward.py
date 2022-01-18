@@ -6,7 +6,7 @@ LAYER1_NODE = 500
 
 
 def get_weight(shape, regularizer):
-    w = tf.Variable(tf.truncated_normal(shape, stddev=0.1))
+    w = tf.Variable(tf.random_normal(shape))
     if regularizer != None: tf.add_to_collection('losses', tf.contrib.layers.l2_regularizer(regularizer)(w))
     return w
 
