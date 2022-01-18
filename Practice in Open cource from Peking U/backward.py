@@ -4,8 +4,7 @@ import mnist_forward
 import os
 
 BATCH_SIZE = 200
-LEARNING_RATE_BASE = 0.1
-LEARNING_RATE_DECAY = 0.99
+LEARNING_RATE = 0.001
 REGULARIZER = 0.0001
 STEPS = 50000
 MOVING_AVERAGE_DECAY = 0.99
@@ -19,23 +18,10 @@ def backward(mnist):
     y = mnist_forward.forward(x, REGULARIZER)
     global_step = tf.Variable(0, trainable=False)
 
-    ce = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=y, labels=tf.argmax(y_, 1))
-    cem = tf.reduce_mean(ce)
-    loss = cem + tf.add_n(tf.get_collection('losses'))
-    learning_rate = tf.train.exponential_decay(
-        LEARNING_RATE_BASE,
-        global_step,
-        mnist.train.num_examples / BATCH_SIZE,
-        LEARNING_RATE_DECAY,
-        staircase=True)
+    loss = tf.reduce_mean(tf.square(y_-y))
+   
 
     train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
-
-    ema = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)
-    ema_op = ema.apply(tf.trainable_variables())
-
-    with tf.control_dependencies([train_step,ema_op]):
-        train_op = tf.no_op(name='train')
 
     saver = tf.train.Saver()
 
